@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>برنامه‌ی روزانه</title>
+<meta name="theme-color" content="#0d0e11">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="تسک‌ها">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css">
+<style>
+:root{
+  --bg:#0d0e11; --s1:#15171b; --s2:#1d2026; --line:#262a32;
+  --tx:#ececee; --mu:#8c919d; --ac:#86a8ff; --acx:#0d0e11; --red:#ff8d8d;
+  color-scheme:dark;
+}
+[data-theme=light]{
+  --bg:#f4f4f1; --s1:#ffffff; --s2:#ecece8; --line:#deded9;
+  --tx:#17181b; --mu:#666b76; --ac:#3556d6; --acx:#ffffff; --red:#c93c3c;
+  color-scheme:light;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--tx)}
+body{
+  font-family:'Vazirmatn',Tahoma,system-ui,sans-serif;
+  font-size:16px;line-height:1.6;
+  -webkit-text-size-adjust:100%;
+}
+[data-theme=light] body::before{
+  content:"";position:fixed;top:0;left:0;right:0;height:env(safe-area-inset-top);background:#0d0e11;z-index:50
+}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+input,textarea,select{font:inherit;color:var(--tx)}
+:focus-visible{outline:2px solid var(--ac);outline-offset:2px;border-radius:10px}
+
+.app{
+  max-width:520px;margin:0 auto;
+  padding:calc(env(safe-area-inset-top) + 18px) 16px calc(env(safe-area-inset-bottom) + 110px);
+}
+
+/* top */
+.top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:18px}
+.top h1{margin:0;font-size:24px;font-weight:700;line-height:1.4}
+.top p{margin:2px 0 0;color:var(--mu);font-size:14px}
+.tools{display:flex;gap:4px}
+.ib{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;color:var(--mu);transition:background .15s,color .15s}
+.ib:hover,.ib:active{background:var(--s1);color:var(--tx)}
+.ib svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+/* calendar */
+.cal{background:var(--s1);border-radius:24px;padding:10px 10px 12px;touch-action:pan-y}
+.calnav{display:flex;align-items:center;justify-content:space-between;padding:2px 2px 6px}
+.calnav .t{font-size:17px;font-weight:600;padding:8px 12px;border-radius:12px}
+.dow,.grid{display:grid;grid-template-columns:repeat(7,1fr)}
+.dow span{text-align:center;font-size:13px;color:var(--mu);padding:4px 0 6px}
+.dow span.f{color:var(--red);opacity:.85}
+.grid{gap:2px}
+.cell{
+  height:50px;border-radius:15px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+  font-size:16px;position:relative;transition:background .15s
+}
+.cell:hover{background:var(--s2)}
+.cell.f{color:var(--red)}
+.cell.today{box-shadow:inset 0 0 0 1.5px var(--ac)}
+.cell.sel{background:var(--ac);color:var(--acx);box-shadow:none;font-weight:700}
+.dots{display:flex;gap:3px;height:5px}
+.dots i{width:5px;height:5px;border-radius:50%;background:var(--c)}
+.dots i.d{opacity:.35}
+.cell.sel .dots i{background:var(--acx);opacity:.7}
+.cell.sel .dots i.d{opacity:.3}
+
+/* controls */
+.row2{display:flex;align-items:center;gap:10px;margin:18px 0 6px}
+.seg{display:inline-grid;grid-auto-flow:column;grid-auto-columns:1fr;background:var(--s1);border-radius:14px;padding:4px;gap:2px}
+.seg button{padding:7px 16px;border-radius:11px;color:var(--mu);font-size:15px;white-space:nowrap}
+.seg button[aria-pressed=true]{background:var(--s2);color:var(--tx);font-weight:600}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:4px 0 8px;margin:0 -16px;padding-inline:16px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{
+  flex:none;display:flex;align-items:center;gap:7px;padding:7px 14px;border-radius:999px;
+  border:1px solid var(--line);color:var(--mu);font-size:14.5px;white-space:nowrap
+}
+.chip i{width:8px;height:8px;border-radius:50%;background:var(--c)}
+.chip[aria-pressed=true]{color:var(--tx);border-color:var(--c,var(--tx));background:color-mix(in srgb,var(--c,var(--tx)) 16%,transparent)}
+
+/* list */
+.lh{display:flex;align-items:baseline;justify-content:space-between;padding:14px 2px 4px}
+.lh b{font-size:17px;font-weight:600}
+.lh span{font-size:13.5px;color:var(--mu)}
+.dayh{padding:18px 2px 2px;font-size:14px;color:var(--mu);font-weight:500}
+.task{display:flex;gap:4px;align-items:flex-start;border-bottom:1px solid var(--line)}
+.task:last-child{border-bottom:0}
+.chk{width:44px;height:44px;flex:none;display:grid;place-items:center;margin-inline-start:-8px}
+.chk span{
+  width:24px;height:24px;border-radius:50%;border:2px solid var(--mu);display:grid;place-items:center;
+  transition:background .15s,border-color .15s
+}
+.chk svg{width:14px;height:14px;stroke:var(--acx);fill:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;opacity:0}
+.task.done .chk span{background:var(--ac);border-color:var(--ac)}
+.task.done .chk svg{opacity:1}
+.tb{flex:1;text-align:start;padding:10px 0 12px;min-width:0}
+.tt{font-size:16.5px;font-weight:500;overflow-wrap:anywhere}
+.td{font-size:14.5px;color:var(--mu);white-space:pre-wrap;overflow-wrap:anywhere;margin-top:1px}
+.meta{display:flex;align-items:center;gap:6px;margin-top:5px;font-size:13px;color:var(--mu)}
+.meta i{width:8px;height:8px;border-radius:50%;background:var(--c);flex:none}
+.task.done .tt{color:var(--mu);text-decoration:line-through;text-decoration-thickness:1px}
+.task.done .td{opacity:.6}
+.empty{text-align:center;color:var(--mu);padding:44px 0 30px}
+.empty button{margin-top:12px;color:var(--ac);font-weight:600;padding:10px 16px;border-radius:12px}
+
+/* fab */
+.fabwrap{position:fixed;inset:auto 0 0 0;display:flex;justify-content:center;pointer-events:none;z-index:10}
+.fabin{width:100%;max-width:520px;padding:0 20px calc(env(safe-area-inset-bottom) + 20px);display:flex}
+.fab{
+  pointer-events:auto;height:56px;padding:0 22px 0 24px;border-radius:28px;background:var(--ac);color:var(--acx);
+  display:flex;align-items:center;gap:8px;font-weight:700;font-size:16px;box-shadow:0 8px 24px rgba(0,0,0,.28)
+}
+.fab svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2.4;stroke-linecap:round}
+
+/* sheet */
+.sheet{position:fixed;inset:0;z-index:40;display:flex;align-items:flex-end;justify-content:center;visibility:hidden}
+.sheet.open{visibility:visible}
+.back{position:absolute;inset:0;background:rgba(0,0,0,.55);opacity:0;transition:opacity .2s}
+.sheet.open .back{opacity:1}
+.panel{
+  position:relative;width:100%;max-width:520px;max-height:92vh;overflow-y:auto;background:var(--s1);
+  border-radius:26px 26px 0 0;padding:10px 18px calc(env(safe-area-inset-bottom) + 20px);
+  transform:translateY(100%);transition:transform .25s ease;overscroll-behavior:contain
+}
+.sheet.open .panel{transform:none}
+.grab{width:40px;height:4px;border-radius:2px;background:var(--line);margin:0 auto 12px}
+.panel h2{margin:0 0 14px;font-size:19px;font-weight:700}
+.panel h3{margin:22px 0 8px;font-size:15px;color:var(--mu);font-weight:500}
+.lbl{display:block;font-size:13.5px;color:var(--mu);margin:16px 2px 7px}
+.fld{
+  width:100%;background:var(--s2);border:1px solid var(--line);border-radius:14px;padding:12px 14px;font-size:16px;
+}
+.fld:focus{outline:none;border-color:var(--ac)}
+.fld.err{border-color:var(--red)}
+textarea.fld{resize:none;min-height:84px;margin-top:8px}
+.date3{display:grid;grid-template-columns:.8fr 1.5fr 1.1fr;gap:8px}
+select.fld{appearance:none;-webkit-appearance:none;padding-inline:12px;text-align:start;background-image:none}
+.pick{display:flex;flex-wrap:wrap;gap:8px}
+.pick .chip{padding:8px 14px}
+.acts{display:flex;gap:10px;margin-top:24px}
+.btn{flex:1;height:50px;border-radius:15px;font-weight:700;background:var(--ac);color:var(--acx)}
+.btn.sec{background:var(--s2);color:var(--tx);font-weight:500}
+.btn.dng{flex:none;padding:0 20px;background:transparent;color:var(--red);font-weight:500}
+
+.crow{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.crow .fld{flex:1}
+.dot{width:44px;height:44px;flex:none;display:grid;place-items:center}
+.dot i{width:22px;height:22px;border-radius:50%;background:var(--c)}
+.sw{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0 12px}
+.sw button{width:34px;height:34px;border-radius:50%;background:var(--c);box-shadow:0 0 0 0 var(--tx)}
+.sw button[aria-pressed=true]{box-shadow:0 0 0 2px var(--s1),0 0 0 4px var(--tx)}
+.hint{font-size:13px;color:var(--mu);margin:6px 2px 0}
+
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="app" id="app"></div>
+<div class="fabwrap"><div class="fabin">
+  <button class="fab" data-act="add" aria-label="افزودن کار جدید">
+    <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>کار جدید
+  </button>
+</div></div>
+<div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-label="پنجره">
+  <div class="back" data-act="close"></div>
+  <div class="panel" id="panel" tabindex="-1"></div>
+</div>
+<input type="file" id="imp" accept="application/json,.json" hidden>
+
+<script>
+(function(){
+'use strict';
+
+/* ================= Jalali calendar (jalaali algorithm) ================= */
+const div=(a,b)=>~~(a/b), mod=(a,b)=>a-~~(a/b)*b;
+const BR=[-61,9,38,199,426,686,756,818,1111,1181,1210,1635,2060,2097,2192,2262,2324,2394,2456,3178];
+function jalCal(jy){
+  let gy=jy+621,leapJ=-14,jp=BR[0],jm,jump=0,leap,leapG,march,n,i;
+  for(i=1;i<BR.length;i++){
+    jm=BR[i];jump=jm-jp;
+    if(jy<jm)break;
+    leapJ+=div(jump,33)*8+div(mod(jump,33),4);jp=jm;
+  }
+  n=jy-jp;
+  leapJ+=div(n,33)*8+div(mod(n,33)+3,4);
+  if(mod(jump,33)===4&&jump-n===4)leapJ+=1;
+  leapG=div(gy,4)-div((div(gy,100)+1)*3,4)-150;
+  march=20+leapJ-leapG;
+  if(jump-n<6)n=n-jump+div(jump+4,33)*33;
+  leap=mod(mod(n+1,33)-1,4);
+  if(leap===-1)leap=4;
+  return {leap,gy,march};
+}
+function g2d(gy,gm,gd){
+  let d=div((gy+div(gm-8,6)+100100)*1461,4)+div(153*mod(gm+9,12)+2,5)+gd-34840408;
+  return d-div(div(gy+100100+div(gm-8,6),100)*3,4)+752;
+}
+function d2g(jdn){
+  let j=4*jdn+139361631;
+  j+=div(div(4*jdn+183187720,146097)*3,4)*4-3908;
+  const i=div(mod(j,1461),4)*5+308;
+  const gd=div(mod(i,153),5)+1, gm=mod(div(i,153),12)+1;
+  return {gy:div(j,1461)-100100+div(8-gm,6),gm,gd};
+}
+function j2d(jy,jm,jd){
+  const r=jalCal(jy);
+  return g2d(r.gy,3,r.march)+(jm-1)*31-div(jm,7)*(jm-7)+jd-1;
+}
+function d2j(jdn){
+  const g=d2g(jdn);let jy=g.gy-621;
+  const r=jalCal(jy),f=g2d(g.gy,3,r.march);
+  let k=jdn-f;
+  if(k>=0){
+    if(k<=185)return {jy,jm:1+div(k,31),jd:mod(k,31)+1};
+    k-=186;
+  }else{
+    jy-=1;k+=179;if(r.leap===1)k+=1;
+  }
+  return {jy,jm:7+div(k,30),jd:mod(k,30)+1};
+}
+const mLen=(y,m)=>m<=6?31:m<=11?30:(jalCal(y).leap===0?30:29);
+const wdIdx=j=>((j+2)%7+7)%7;           // 0 = شنبه … 6 = جمعه
+const todayJ=()=>{const n=new Date();return g2d(n.getFullYear(),n.getMonth()+1,n.getDate())};
+
+const MONTHS=['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند'];
+const WD=['شنبه','یک‌شنبه','دوشنبه','سه‌شنبه','چهارشنبه','پنج‌شنبه','جمعه'];
+const WD1=['ش','ی','د','س','چ','پ','ج'];
+const PD='۰۱۲۳۴۵۶۷۸۹';
+const fa=n=>String(n).replace(/\d/g,d=>PD[d]);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const dayLabel=j=>{const p=d2j(j);return WD[wdIdx(j)]+' '+fa(p.jd)+' '+MONTHS[p.jm-1]};
+const REP={none:'تکرار نشود',daily:'هر روز',weekly:'هر هفته',monthly:'هر ماه'};
+
+/* ================= State & storage ================= */
+const K='tasks-fa-v1',mem={};
+const PALETTE=['#86a8ff','#c4a3ff','#6fd3a8','#ffb86b','#ff8d8d','#f2d16b','#7bd4e8','#e89ac7'];
+const DEFAULT_CATS=[
+  {id:'work',name:'کار',color:PALETTE[0]},
+  {id:'uni',name:'دانشگاه',color:PALETTE[1]},
+  {id:'fin',name:'مالی',color:PALETTE[2]}
+];
+function load(){
+  let r=null;
+  try{r=localStorage.getItem(K)}catch(e){r=mem[K]||null}
+  if(r){try{return JSON.parse(r)}catch(e){}}
+  return null;
+}
+function persist(){
+  const s=JSON.stringify({cats:S.cats,tasks:S.tasks,theme:S.theme});
+  try{localStorage.setItem(K,s)}catch(e){mem[K]=s}
+}
+const S=Object.assign({cats:DEFAULT_CATS,tasks:[],theme:'dark'},load()||{});
+let T=todayJ();
+const t0=d2j(T);
+const U={vy:t0.jy,vm:t0.jm,sel:T,mode:'day',filter:null};
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+const catOf=id=>S.cats.find(c=>c.id===id)||{name:'بدون دسته',color:'#8c919d'};
+
+/* ================= Recurrence ================= */
+function occurs(t,j){
+  if(j<t.date)return false;
+  switch(t.repeat){
+    case 'daily':return true;
+    case 'weekly':return (j-t.date)%7===0;
+    case 'monthly':{
+      const a=d2j(t.date),b=d2j(j);
+      return b.jd===Math.min(a.jd,mLen(b.jy,b.jm));
+    }
+    default:return j===t.date;
+  }
+}
+const tasksOn=j=>S.tasks
+  .filter(t=>(U.filter===null||t.cat===U.filter)&&occurs(t,j))
+  .sort((a,b)=>(!!a.done[j])-(!!b.done[j])||a.created-b.created);
+
+/* ================= Icons ================= */
+const I={
+  prev:'<svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>',
+  next:'<svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg>',
+  sun:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M5.6 18.4L7 17M17 7l1.4-1.4"/></svg>',
+  moon:'<svg viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg>',
+  tag:'<svg viewBox="0 0 24 24"><path d="M3 12V4h8l10 10-8 8L3 12z"/><circle cx="7.5" cy="8.5" r="1"/></svg>',
+  check:'<svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
+  trash:'<svg viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>'
+};
+const $=s=>document.querySelector(s);
+
+/* ================= Render ================= */
+function render(){
+  document.documentElement.dataset.theme=S.theme;
+  const m=$('meta[name=theme-color]');if(m)m.content=S.theme==='dark'?'#0d0e11':'#f4f4f1';
+
+  const left=S.tasks.filter(t=>occurs(t,T)&&!t.done[T]).length;
+  const any=S.tasks.some(t=>occurs(t,T));
+  const sub=!any?'امروز کاری ثبت نشده':left?fa(left)+' کار برای امروز مانده':'همه‌ی کارهای امروز انجام شد';
+
+  /* grid */
+  const len=mLen(U.vy,U.vm),first=j2d(U.vy,U.vm,1),off=wdIdx(first);
+  let cells='';
+  for(let i=0;i<off;i++)cells+='<span></span>';
+  for(let d=1;d<=len;d++){
+    const j=first+d-1,ts=tasksOn(j);
+    const seen=[];
+    ts.forEach(t=>{if(!seen.find(s=>s.c===catOf(t.cat).color&&s.d===!!t.done[j]))seen.push({c:catOf(t.cat).color,d:!!t.done[j]})});
+    const dots=seen.slice(0,3).map(s=>`<i class="${s.d?'d':''}" style="--c:${s.c}"></i>`).join('');
+    const cls=['cell',j===U.sel?'sel':'',j===T?'today':'',wdIdx(j)===6?'f':''].join(' ');
+    cells+=`<button class="${cls}" data-act="pick" data-d="${j}" aria-label="${dayLabel(j)}${ts.length?'، '+fa(ts.length)+' کار':''}"${j===T?' aria-current="date"':''}><span>${fa(d)}</span><span class="dots">${dots}</span></button>`;
+  }
+
+  const chips=`<button class="chip" data-act="filter" data-c="" aria-pressed="${U.filter===null}">همه</button>`+
+    S.cats.map(c=>`<button class="chip" data-act="filter" data-c="${c.id}" style="--c:${c.color}" aria-pressed="${U.filter===c.id}"><i></i>${esc(c.name)}</button>`).join('');
+
+  document.getElementById('app').innerHTML=`
+  <header class="top">
+    <div><h1>${dayLabel(T)}</h1><p>${sub}</p></div>
+    <div class="tools">
+      <button class="ib" data-act="theme" aria-label="تغییر تم">${S.theme==='dark'?I.sun:I.moon}</button>
+      <button class="ib" data-act="cats" aria-label="مدیریت دسته‌بندی‌ها">${I.tag}</button>
+    </div>
+  </header>
+
+  <section class="cal" id="cal" aria-label="تقویم">
+    <div class="calnav">
+      <button class="ib" data-act="prev" aria-label="ماه قبل">${I.prev}</button>
+      <button class="t" data-act="today" aria-label="برگشت به امروز">${MONTHS[U.vm-1]} ${fa(U.vy)}</button>
+      <button class="ib" data-act="next" aria-label="ماه بعد">${I.next}</button>
+    </div>
+    <div class="dow">${WD1.map((w,i)=>`<span class="${i===6?'f':''}">${w}</span>`).join('')}</div>
+    <div class="grid">${cells}</div>
+  </section>
+
+  <div class="row2">
+    <div class="seg" role="group" aria-label="نوع نمایش">
+      <button data-act="mode" data-m="day" aria-pressed="${U.mode==='day'}">روز</button>
+      <button data-act="mode" data-m="month" aria-pressed="${U.mode==='month'}">ماه</button>
+    </div>
+  </div>
+  <div class="chips" role="group" aria-label="فیلتر دسته‌بندی">${chips}</div>
+  <section aria-live="polite">${U.mode==='day'?dayList():monthList()}</section>`;
+}
+
+function taskRow(t,j){
+  const c=catOf(t.cat),done=!!t.done[j];
+  const rep=t.repeat&&t.repeat!=='none'?` <span>· ${REP[t.repeat]}</span>`:'';
+  return `<div class="task ${done?'done':''}">
+    <button class="chk" data-act="toggle" data-id="${t.id}" data-d="${j}" role="checkbox" aria-checked="${done}" aria-label="انجام شد: ${esc(t.title)}"><span>${I.check}</span></button>
+    <button class="tb" data-act="edit" data-id="${t.id}">
+      <div class="tt">${esc(t.title)}</div>
+      ${t.desc?`<div class="td">${esc(t.desc)}</div>`:''}
+      <div class="meta"><i style="--c:${c.color}"></i>${esc(c.name)}${rep}</div>
+    </button>
+  </div>`;
+}
+function dayList(){
+  const ts=tasksOn(U.sel),done=ts.filter(t=>t.done[U.sel]).length;
+  const head=`<div class="lh"><b>${U.sel===T?'امروز، ':''}${dayLabel(U.sel)}</b>${ts.length?`<span>${fa(done)} از ${fa(ts.length)} انجام شد</span>`:''}</div>`;
+  if(!ts.length)return head+`<div class="empty">برای این روز کاری نیست<br><button data-act="add">افزودن کار</button></div>`;
+  return head+ts.map(t=>taskRow(t,U.sel)).join('');
+}
+function monthList(){
+  const len=mLen(U.vy,U.vm),first=j2d(U.vy,U.vm,1);
+  let html='',total=0,done=0;
+  for(let d=1;d<=len;d++){
+    const j=first+d-1,ts=tasksOn(j);
+    if(!ts.length)continue;
+    total+=ts.length;done+=ts.filter(t=>t.done[j]).length;
+    html+=`<div class="dayh">${j===T?'امروز، ':''}${dayLabel(j)}</div>`+ts.map(t=>taskRow(t,j)).join('');
+  }
+  const head=`<div class="lh"><b>${MONTHS[U.vm-1]} ${fa(U.vy)}</b>${total?`<span>${fa(done)} از ${fa(total)} انجام شد</span>`:''}</div>`;
+  return head+(html||`<div class="empty">در این ماه کاری ثبت نشده<br><button data-act="add">افزودن کار</button></div>`);
+}
+
+/* ================= Sheet ================= */
+const sheet=$('#sheet'),panel=$('#panel');
+function openSheet(html,focusSel){
+  panel.innerHTML='<div class="grab"></div>'+html;
+  sheet.classList.add('open');
+  setTimeout(()=>{const f=focusSel&&panel.querySelector(focusSel);(f||panel).focus({preventScroll:true})},60);
+}
+function closeSheet(){sheet.classList.remove('open')}
+
+let F={};
+function openTask(id){
+  const t=id?S.tasks.find(x=>x.id===id):null;
+  const date=t?t.date:U.sel,p=d2j(date);
+  F={id:t?t.id:null,cat:t?t.cat:(U.filter||(S.cats[0]&&S.cats[0].id)||null),repeat:t?t.repeat||'none':'none'};
+  const y0=Math.min(t0.jy,p.jy)-1,y1=Math.max(t0.jy,p.jy)+5;
+  let ys='';for(let y=y0;y<=y1;y++)ys+=`<option value="${y}"${y===p.jy?' selected':''}>${fa(y)}</option>`;
+  let ds='';for(let d=1;d<=31;d++)ds+=`<option value="${d}"${d===p.jd?' selected':''}>${fa(d)}</option>`;
+  const ms=MONTHS.map((m,i)=>`<option value="${i+1}"${i+1===p.jm?' selected':''}>${m}</option>`).join('');
+  openSheet(`
+    <h2>${t?'ویرایش کار':'کار جدید'}</h2>
+    <input class="fld" id="f-title" placeholder="عنوان کار" value="${t?esc(t.title):''}" maxlength="120" autocomplete="off" aria-label="عنوان">
+    <textarea class="fld" id="f-desc" placeholder="توضیحات (اختیاری)" aria-label="توضیحات">${t?esc(t.desc||''):''}</textarea>
+    <span class="lbl">تاریخ</span>
+    <div class="date3">
+      <select class="fld" id="f-d" aria-label="روز">${ds}</select>
+      <select class="fld" id="f-m" aria-label="ماه">${ms}</select>
+      <select class="fld" id="f-y" aria-label="سال">${ys}</select>
+    </div>
+    <span class="lbl">دسته‌بندی</span>
+    <div class="pick" id="pk-cat">
+      ${S.cats.map(c=>`<button class="chip" data-act="pickcat" data-c="${c.id}" style="--c:${c.color}" aria-pressed="${F.cat===c.id}"><i></i>${esc(c.name)}</button>`).join('')}
+      <button class="chip" data-act="pickcat" data-c="" aria-pressed="${!F.cat}">بدون دسته</button>
+    </div>
+    <span class="lbl">تکرار</span>
+    <div class="pick" id="pk-rep">
+      ${Object.keys(REP).map(k=>`<button class="chip" data-act="pickrep" data-r="${k}" aria-pressed="${F.repeat===k}">${REP[k]}</button>`).join('')}
+    </div>
+    <div class="acts">
+      <button class="btn" data-act="save">ذخیره</button>
+      ${t?`<button class="btn dng" data-act="del">حذف</button>`:`<button class="btn sec" data-act="close">انصراف</button>`}
+    </div>`, t?null:'#f-title');
+}
+function saveTask(){
+  const ti=$('#f-title'),title=ti.value.trim();
+  if(!title){ti.classList.add('err');ti.focus();return}
+  const y=+$('#f-y').value,m=+$('#f-m').value,d=Math.min(+$('#f-d').value,mLen(y,m));
+  const date=j2d(y,m,d),desc=$('#f-desc').value.trim();
+  if(F.id){
+    const t=S.tasks.find(x=>x.id===F.id);
+    const had=Object.keys(t.done).length>0;
+    Object.assign(t,{title,desc,cat:F.cat,repeat:F.repeat,date});
+    if(F.repeat==='none')t.done=had?{[date]:true}:{};
+  }else{
+    S.tasks.push({id:uid(),title,desc,cat:F.cat,repeat:F.repeat,date,done:{},created:Date.now()});
+  }
+  if(U.filter!==null&&U.filter!==F.cat)U.filter=null;
+  const p=d2j(date);U.sel=date;U.vy=p.jy;U.vm=p.jm;
+  persist();closeSheet();render();
+}
+
+let NC=PALETTE[3];
+function openCats(){
+  const rows=S.cats.map(c=>`
+    <div class="crow">
+      <button class="dot" data-act="cyc" data-c="${c.id}" aria-label="تغییر رنگ ${esc(c.name)}" style="--c:${c.color}"><i></i></button>
+      <input class="fld catname" data-c="${c.id}" value="${esc(c.name)}" maxlength="24" aria-label="نام دسته">
+      <button class="ib" data-act="delcat" data-c="${c.id}" aria-label="حذف ${esc(c.name)}" style="color:var(--red)">${I.trash}</button>
+    </div>`).join('');
+  const sw=PALETTE.map(c=>`<button data-act="swatch" data-col="${c}" style="--c:${c}" aria-label="رنگ" aria-pressed="${c===NC}"></button>`).join('');
+  openSheet(`
+    <h2>دسته‌بندی‌ها</h2>
+    ${rows||'<p class="hint">هنوز دسته‌ای نداری.</p>'}
+    <h3>دسته‌ی جدید</h3>
+    <input class="fld" id="nc-name" placeholder="مثلاً: شخصی" maxlength="24" autocomplete="off" aria-label="نام دسته‌ی جدید">
+    <div class="sw" id="sw">${sw}</div>
+    <button class="btn" style="width:100%" data-act="addcat">افزودن دسته</button>
+    <h3>پشتیبان‌گیری</h3>
+    <div class="acts" style="margin-top:0">
+      <button class="btn sec" data-act="export">ذخیره‌ی فایل</button>
+      <button class="btn sec" data-act="import">بازیابی</button>
+    </div>
+    <p class="hint">اطلاعات فقط روی همین دستگاه ذخیره می‌شود. برای انتقال به گوشی دیگر از پشتیبان استفاده کن.</p>`);
+}
+
+/* ================= Actions ================= */
+function shiftMonth(n){
+  let m=U.vm+n,y=U.vy;
+  if(m>12){m=1;y++}else if(m<1){m=12;y--}
+  U.vy=y;U.vm=m;
+  U.sel=(y===t0.jy&&m===t0.jm&&false)?T:j2d(y,m,1);
+  const cur=d2j(T);if(y===cur.jy&&m===cur.jm)U.sel=T;
+  render();
+}
+document.addEventListener('click',e=>{
+  const el=e.target.closest('[data-act]');if(!el)return;
+  const a=el.dataset.act;
+  switch(a){
+    case 'pick':U.sel=+el.dataset.d;render();break;
+    case 'prev':shiftMonth(-1);break;
+    case 'next':shiftMonth(1);break;
+    case 'today':{T=todayJ();const p=d2j(T);U.vy=p.jy;U.vm=p.jm;U.sel=T;render();break}
+    case 'mode':U.mode=el.dataset.m;render();break;
+    case 'filter':U.filter=el.dataset.c||null;render();break;
+    case 'toggle':{
+      const t=S.tasks.find(x=>x.id===el.dataset.id),d=el.dataset.d;
+      if(t.done[d])delete t.done[d];else t.done[d]=true;
+      persist();render();break}
+    case 'edit':openTask(el.dataset.id);break;
+    case 'add':openTask(null);break;
+    case 'theme':S.theme=S.theme==='dark'?'light':'dark';persist();render();break;
+    case 'cats':openCats();break;
+    case 'close':closeSheet();break;
+    /* task sheet */
+    case 'pickcat':
+      F.cat=el.dataset.c||null;
+      document.querySelectorAll('#pk-cat .chip').forEach(b=>b.setAttribute('aria-pressed',(b.dataset.c||null)===F.cat));
+      break;
+    case 'pickrep':
+      F.repeat=el.dataset.r;
+      document.querySelectorAll('#pk-rep .chip').forEach(b=>b.setAttribute('aria-pressed',b.dataset.r===F.repeat));
+      break;
+    case 'save':saveTask();break;
+    case 'del':{
+      const t=S.tasks.find(x=>x.id===F.id);
+      const msg=t.repeat&&t.repeat!=='none'?'این کار تکرارشونده با همه‌ی تکرارهایش حذف شود؟':'این کار حذف شود؟';
+      if(confirm(msg)){S.tasks=S.tasks.filter(x=>x.id!==F.id);persist();closeSheet();render()}
+      break}
+    /* category sheet */
+    case 'cyc':{
+      const c=S.cats.find(x=>x.id===el.dataset.c);
+      c.color=PALETTE[(PALETTE.indexOf(c.color)+1)%PALETTE.length];
+      persist();openCats();render();break}
+    case 'delcat':{
+      const c=S.cats.find(x=>x.id===el.dataset.c);
+      if(confirm('دسته‌ی «'+c.name+'» حذف شود؟ کارهای این دسته بدون دسته می‌مانند.')){
+        S.cats=S.cats.filter(x=>x.id!==c.id);
+        S.tasks.forEach(t=>{if(t.cat===c.id)t.cat=null});
+        if(U.filter===c.id)U.filter=null;
+        persist();openCats();render();
+      }
+      break}
+    case 'swatch':
+      NC=el.dataset.col;
+      document.querySelectorAll('#sw button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.col===NC));
+      break;
+    case 'addcat':{
+      const inp=$('#nc-name'),name=inp.value.trim();
+      if(!name){inp.classList.add('err');inp.focus();return}
+      S.cats.push({id:uid(),name,color:NC});
+      NC=PALETTE[(PALETTE.indexOf(NC)+1)%PALETTE.length];
+      persist();openCats();render();break}
+    case 'export':{
+      const blob=new Blob([JSON.stringify({cats:S.cats,tasks:S.tasks},null,1)],{type:'application/json'});
+      const a2=document.createElement('a');a2.href=URL.createObjectURL(blob);
+      a2.download='tasks-backup.json';document.body.appendChild(a2);a2.click();a2.remove();
+      setTimeout(()=>URL.revokeObjectURL(a2.href),1000);break}
+    case 'import':$('#imp').click();break;
+  }
+});
+document.addEventListener('change',e=>{
+  const el=e.target;
+  if(el.classList&&el.classList.contains('catname')){
+    const c=S.cats.find(x=>x.id===el.dataset.c),v=el.value.trim();
+    if(c&&v){c.name=v;persist();render()}else if(c){el.value=c.name}
+  }
+  if(el.id==='imp'&&el.files[0]){
+    const r=new FileReader();
+    r.onload=()=>{
+      try{
+        const d=JSON.parse(r.result);
+        if(!Array.isArray(d.cats)||!Array.isArray(d.tasks))throw 0;
+        if(confirm('اطلاعات فعلی با فایل پشتیبان جایگزین شود؟')){
+          S.cats=d.cats;S.tasks=d.tasks;U.filter=null;persist();openCats();render();
+        }
+      }catch(err){alert('فایل پشتیبان معتبر نیست.')}
+      el.value='';
+    };
+    r.readAsText(el.files[0]);
+  }
+});
+document.addEventListener('input',e=>{if(e.target.classList.contains('err'))e.target.classList.remove('err')});
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape')closeSheet();
+  if(e.key==='Enter'&&e.target.id==='f-title')saveTask();
+  if(e.key==='Enter'&&e.target.id==='nc-name')document.querySelector('[data-act=addcat]').click();
+});
+
+/* swipe between months */
+let sx=null;
+document.addEventListener('touchstart',e=>{sx=e.target.closest('#cal')?e.touches[0].clientX:null},{passive:true});
+document.addEventListener('touchend',e=>{
+  if(sx===null)return;
+  const dx=e.changedTouches[0].clientX-sx;sx=null;
+  if(Math.abs(dx)>60)shiftMonth(dx<0?1:-1);
+},{passive:true});
+
+/* refresh "today" when the app is reopened on a new day */
+document.addEventListener('visibilitychange',()=>{
+  if(document.visibilityState==='visible'){
+    const n=todayJ();
+    if(n!==T){T=n;const p=d2j(T);U.vy=p.jy;U.vm=p.jm;U.sel=T;render()}
+  }
+});
+
+render();
+if('serviceWorker' in navigator&&/^https?:$/.test(location.protocol)){
+  navigator.serviceWorker.register('sw.js').catch(()=>{});
+}
+})();
+</script>
+</body>
+</html>
